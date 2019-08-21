@@ -18,12 +18,14 @@ function fillContentData(data){
 
 }
 
-function prepareTaskContentToBeShown(){
-	console.log("Preparing")
+function prepareTaskContentToBeShown(data = todoData){
+	let arr = data;
+	console.log(arr)
 		content = `
 			<div class="container">
 				<div class="containerInput">
-					<input type="text" placeholder="Enter a new Task" class="input" id="newItem">
+					<input type="text" placeholder="Enter a new Task" class="input" id="newItem" onKeyUp="searchItem()">
+					<div id="searchDropdown"></div>
 				</div>
 				<div class="containerButton">
 					<input type="button" value="Add Item" class="button" onclick="addItem()">
@@ -36,7 +38,7 @@ function prepareTaskContentToBeShown(){
 							<th>Delete</th>
 						</tr>`;
 
-	for(let tabData of todoData){
+	for(let tabData of arr){
 		content += `<tr>
 					<td>${tabData['taskName']}</td>
 					<td><input type="button" value="Update"></td>
@@ -59,4 +61,26 @@ function addItem(){
 	fillContentData("ToDo")			
 }
 
+function searchItem(){
+	let content = `<div class="dropdown">`
+	let searchKey = document.getElementById('newItem').value;
+	let filteredTasks = todoData.filter(data => data["taskName"].includes(searchKey));
+	console.log(filteredTasks)
+	if(searchKey.length == 0){
+		console.log("Should be none")
+		document.getElementById('searchDropdown').style.display = "none";
+	}
+	else{
+		document.getElementById('searchDropdown').style.display = "block";
+		let content = "<ul>";
+
+		for(let task of filteredTasks){
+			content += `<li><input class=tabs type=button value=${task['taskName']}></li>`;
+		}
+		content+= "</ul>";
+
+		document.getElementById('searchDropdown').innerHTML = content;
+	}
+
+}	
 
