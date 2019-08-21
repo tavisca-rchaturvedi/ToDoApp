@@ -46,12 +46,12 @@ function prepareTaskContentToBeShown(data = todoData){
 							<th>Update</th>
 							<th>Delete</th>
 						</tr>`;
-
-	for(let tabData of arr){
+	let counter = 0;
+	for(let tabIndex in arr){
 		content += `<tr>
-					<td>${tabData['taskName']}</td>
-					<td><input type="button" value="Update"></td>
-					<td><input type="button" value="Delete" onclick=deleteItem("${tabData['taskName']}")></td>
+					<td><input type="text" id="input${tabIndex}" value=${arr[tabIndex]['taskName']} disabled></td>
+					<td><input type="button" value="Update" onclick="updateItem(${tabIndex})" id="update${tabIndex}"> <input type="button" value="Save" id="save${tabIndex}" style="display: none" onclick="saveItem(${tabIndex})"></td>
+					<td><input type="button" value="Delete" onclick=deleteItem("${arr[tabIndex]['taskName']}")></td>
 				</tr>`;
 	}
 	content += "</div></table></div>";
@@ -74,7 +74,7 @@ function searchItem(){
 	let searchKey = document.getElementById('newItem').value;
 	let filteredTasks = todoData.filter(data => data["taskName"].includes(searchKey));
 
-	if(searchKey.length == 0){
+	if(searchKey.length == 0 || filteredTasks.length == 0){
 		document.getElementById('searchDropdown').style.display = "none";
 	}
 	else{
@@ -88,8 +88,19 @@ function searchItem(){
 
 		document.getElementById('searchDropdown').innerHTML = content;
 	}
-
-
-
 }	
 
+function updateItem(itemId){
+	console.log(itemId);
+	document.getElementById('input'+itemId).disabled = false;
+	document.getElementById('update'+itemId).style.display = 'none';
+	document.getElementById('save'+itemId).style.display = 'block';
+}
+
+function saveItem(itemId){
+	todoData[itemId]["taskName"] = document.getElementById('input'+itemId).value;
+	document.getElementById('input'+itemId).disabled = true;
+	document.getElementById('update'+itemId).style.display ='block';
+	document.getElementById('save'+itemId).style.display = 'none';
+	console.log(todoData)
+}
