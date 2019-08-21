@@ -1,0 +1,92 @@
+ul{
+			margin:10px 10px 10px 10px;
+			padding: 10px 10px 10px 10px;
+			width: 100%;
+		}
+
+		.appContainer{
+			border:5px solid black;
+		}
+
+		.containerTable{
+			margin: 10px;
+			text-align: -webkit-center;
+		}
+
+		.container {
+			text-align: center;
+			width:80%;
+			margin:auto auto;
+			min-width: 100px;
+			min-height: 200px;
+		}
+		.containerElements{
+			display: inline-flex;
+		}
+		.containerInput{
+			display:inline-flex;
+			margin-top: 10px;
+		}
+		.containerButton{
+			margin-left: 5px;
+			margin-top:10px;
+			display:inline-flex;
+		}
+
+		.input{
+			padding: 12px 30px;
+			font-size: inherit;
+		}
+
+		.button{
+			background-color: green;
+			color: white;
+			border-color: gold;
+			border-radius:8px;
+			transition-duration: 0.3s;
+			padding: 12px 12px;
+			font-size: inherit;
+		}
+
+		.button:hover{
+			background-color: gray;
+		}
+
+		.tabs{
+			display:block;
+			inline-size: -webkit-fill-available;
+			background-color: green;
+			color: white;
+			border-radius: 10px;
+			font-size: larger;
+		}
+
+		.tabInput{
+			margin: inherit;
+		}
+
+		.tabList{
+			border: 2px solid;
+			display:inline-block;
+			width: 16%;
+			margin: 10px;
+			min-height: 200px;
+		}
+
+		.tabContent{
+			border:2px solid red;
+			display:inline-flex;
+			width: 64%;
+			min-height: 200px;
+			vertical-align: top;
+			margin:10px;
+		}
+
+		td{
+			height: 25px;
+			min-width: 30px;
+		}
+
+		th{
+			height: 50px;
+		}
