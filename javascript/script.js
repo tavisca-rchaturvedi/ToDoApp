@@ -7,15 +7,13 @@ let todoData = [{
 					"taskName" : "Assignment3"
 				}];
 
+let autoCompleteList= ["ActionScript", "AppleScript","Asp","BASIC", "C", "C++", "Clojure", "COBOL","ColdFusion","Erlang","Fortran","Groovy","Haskell","Java","JavaScript","Lisp","Perl","PHP","Python","Ruby","Scala","Scheme"];
 
 function fillContentData(data){
 	if(data == "ToDo")
 		document.getElementById("tabContent").innerHTML = prepareTaskContentToBeShown();
 	else
 		document.getElementById("tabContent").innerHTML = "";
-
-		console.log(document.getElementById("tabContent").innerHTML)
-
 }
 
 function deleteItem(taskName){
@@ -58,10 +56,12 @@ function prepareTaskContentToBeShown(data = todoData){
 	return content;
 }
 
-function addItem(){
+function addItem(data){
+	console.log(data)
 	let elem = document.getElementById("newItem");
+	console.log(elem);
 	if(elem != null){
-	let newTask = elem.value;
+	let newTask = data || elem.value;
 		todoData.push({
 			"taskName" : newTask
 		});
@@ -72,7 +72,7 @@ function addItem(){
 
 function searchItem(){
 	let searchKey = document.getElementById('newItem').value;
-	let filteredTasks = todoData.filter(data => data["taskName"].includes(searchKey));
+	let filteredTasks = autoCompleteList.filter(data => data.includes(searchKey));
 
 	if(searchKey.length == 0 || filteredTasks.length == 0){
 		document.getElementById('searchDropdown').style.display = "none";
@@ -82,7 +82,7 @@ function searchItem(){
 		let content = "<ul>";
 
 		for(let task of filteredTasks){
-			content += `<li><input class=tabs type=button value=${task['taskName']}></li>`;
+			content += `<li><input class=tabs type=button value=${task} onclick=addItem("${task}")></li>`;
 		}
 		content+= "</ul>";
 
