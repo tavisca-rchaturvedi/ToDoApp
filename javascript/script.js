@@ -18,6 +18,15 @@ function fillContentData(data){
 
 }
 
+function deleteItem(taskName){
+		for(let taskIndex in todoData){
+			if(todoData[taskIndex]['taskName'] === taskName){
+				todoData.splice(taskIndex,1);
+			}
+		}
+		fillContentData("ToDo");
+}
+
 function prepareTaskContentToBeShown(data = todoData){
 	let arr = data;
 	console.log(arr)
@@ -42,7 +51,7 @@ function prepareTaskContentToBeShown(data = todoData){
 		content += `<tr>
 					<td>${tabData['taskName']}</td>
 					<td><input type="button" value="Update"></td>
-					<td><input type="button" value="Delete"></td>
+					<td><input type="button" value="Delete" onclick=deleteItem("${tabData['taskName']}")></td>
 				</tr>`;
 	}
 	content += "</div></table></div>";
@@ -62,12 +71,10 @@ function addItem(){
 }
 
 function searchItem(){
-	let content = `<div class="dropdown">`
 	let searchKey = document.getElementById('newItem').value;
 	let filteredTasks = todoData.filter(data => data["taskName"].includes(searchKey));
-	console.log(filteredTasks)
+
 	if(searchKey.length == 0){
-		console.log("Should be none")
 		document.getElementById('searchDropdown').style.display = "none";
 	}
 	else{
@@ -81,6 +88,8 @@ function searchItem(){
 
 		document.getElementById('searchDropdown').innerHTML = content;
 	}
+
+
 
 }	
 
