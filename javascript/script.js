@@ -1,4 +1,4 @@
-
+ 
 let todoData = [{
 					"taskName" : "Assignment1"
 				},{
@@ -7,13 +7,30 @@ let todoData = [{
 					"taskName" : "Assignment3"
 				}];
 
-let autoCompleteList= ["ActionScript", "AppleScript","Asp","BASIC", "C", "C++", "Clojure", "COBOL","ColdFusion","Erlang","Fortran","Groovy","Haskell","Java","JavaScript","Lisp","Perl","PHP","Python","Ruby","Scala","Scheme"];
+const autoCompleteList= ["ActionScript", "AppleScript","Asp","BASIC", "C", "C++", "Clojure", "COBOL","ColdFusion","Erlang","Fortran","Groovy","Haskell","Java","JavaScript","Lisp","Perl","PHP","Python","Ruby","Scala","Scheme"];
+
+
+function autocompleteApiData(){
+	var xmlhttp = new XMLHttpRequest();
+	var url = "https://gofile.io/?c=7PxmEp";
+
+	xmlhttp.onreadystatechange = function() {
+	    if (this.readyState == 4 && this.status == 200) {
+	        var myArr = JSON.parse(this.responseText);
+	        console.log(myArr);
+	    }
+	};
+	xmlhttp.open("GET", url, true);
+	xmlhttp.send();
+
+}
+
+autocompleteApiData();
 
 function fillContentData(data){
+	document.getElementById("tabContent").innerHTML = "";
 	if(data == "ToDo")
-		document.getElementById("tabContent").innerHTML = prepareTaskContentToBeShown();
-	else
-		document.getElementById("tabContent").innerHTML = "";
+		document.getElementById("tabContent").appendChild(prepareTaskContentToBeShown());
 }
 
 function deleteItem(taskName){
@@ -25,46 +42,129 @@ function deleteItem(taskName){
 		fillContentData("ToDo");
 }
 
+function createInputElement(type, value, classOfButton, id){
+		
+	let inputElement = document.createElement("input");
+
+	inputElement.setAttribute("type", type);
+	inputElement.setAttribute("id", id);
+	inputElement.setAttribute("value",value);
+	inputElement.setAttribute("class",classOfButton);
+
+	return inputElement;
+}
+
 function prepareTaskContentToBeShown(data = todoData){
 	let arr = data;
 	console.log(arr)
-		content = `
-			<div class="container">
-				<div class="containerInput">
-					<input type="text" placeholder="Enter a new Task" class="input" id="newItem" onKeyUp="searchItem()">
-					<div id="searchDropdown"></div>
-				</div>
-				<div class="containerButton">
-					<input type="button" value="Add Item" class="button" onclick="addItem()">
-				</div>
-				<div class="containerTable">
-					<table border=1>
-						<tr>
-							<th>Task</th>
-							<th>Update</th>
-							<th>Delete</th>
-						</tr>`;
-	let counter = 0;
+
+	let element;
+
+	const tabContainer = document.createElement('div');
+	tabContainer.setAttribute("class", "container");
+
+	element = [];
+	element[0] = document.createElement('div');
+	element[0].setAttribute("class", "containerInput");
+
+	let inputElement = createInputElement("text", "", "input", "newItem")
+	inputElement.setAttribute("placeholder", "Enter a new Task");
+	inputElement.addEventListener("keyup",() => searchItem());
+
+	element[0].appendChild(inputElement);
+
+	let divElement = document.createElement("div");
+	divElement.setAttribute("id","searchDropdown");
+
+	element[0].appendChild(divElement);
+
+	element[1] = document.createElement("div");
+	element[1].setAttribute("class", "containerButton");
+
+	inputElement = createInputElement("button","Add Item", "button", "");
+	inputElement.addEventListener("click", () => addItem());
+
+	element[1].appendChild(inputElement);
+
+	element[2] = document.createElement("div");
+	element[2].setAttribute("class", "containerTable");
+
+	let tableElement = document.createElement("table");
+	tableElement.setAttribute("border","1");
+
+	let rows = document.createElement("tr");
+	let column = document.createElement("th");
+	column.innerText = "Task";
+	rows.appendChild(column);
+
+	column = document.createElement("th");
+	column.innerText = "Update";
+	rows.appendChild(column);
+
+	column = document.createElement("th");
+	column.innerText = "Delete";
+	rows.appendChild(column);
+
+	tableElement.appendChild(rows);
+
+
 	for(let tabIndex in arr){
-		content += `<tr>
-					<td><input type="text" id="input${tabIndex}" value=${arr[tabIndex]['taskName']} disabled></td>
-					<td><input type="button" value="Update" onclick="updateItem(${tabIndex})" id="update${tabIndex}"> <input type="button" value="Save" id="save${tabIndex}" style="display: none" onclick="saveItem(${tabIndex})"></td>
-					<td><input type="button" value="Delete" onclick=deleteItem("${arr[tabIndex]['taskName']}")></td>
-				</tr>`;
+
+		rows = document.createElement("tr");
+		column = document.createElement("td");
+		inputElement = createInputElement("text", arr[tabIndex]['taskName'], "", "input"+tabIndex);
+		inputElement.setAttribute("value",arr[tabIndex]['taskName']);
+		inputElement.disabled = true;
+
+		column.appendChild(inputElement);
+		rows.appendChild(column);
+
+		column = document.createElement("td");
+		inputElement = createInputElement("button","Update", "tableButton", "update"+tabIndex);
+		inputElement.addEventListener("click", () => updateItem(tabIndex));
+		column.appendChild(inputElement);
+
+		inputElement = createInputElement("button","Save", "tableButton", "save"+tabIndex);
+		inputElement.setAttribute("style","display: none");
+		inputElement.addEventListener("click", () => saveItem(tabIndex));
+
+		column.appendChild(inputElement);
+		rows.appendChild(column);
+
+		column = document.createElement("td");
+		inputElement = createInputElement("button","Delete", "tableButton", "");
+		inputElement.addEventListener("click", () => deleteItem(arr[tabIndex]['taskName']));
+		column.appendChild(inputElement);
+		rows.appendChild(column);
+
+		tableElement.appendChild(rows);
+		console.log(tableElement)
+
 	}
-	content += "</div></table></div>";
-	return content;
+	element[2].appendChild(tableElement);
+	tabContainer.appendChild(element[0]);
+	tabContainer.appendChild(element[1]);
+	tabContainer.appendChild(element[2]);
+	return tabContainer;
 }
 
 function addItem(data){
-	console.log(data)
 	let elem = document.getElementById("newItem");
 	console.log(elem);
 	if(elem != null){
-	let newTask = data || elem.value;
-		todoData.push({
-			"taskName" : newTask
-		});
+		let inList = false;
+		let newTask = data || elem.value;
+		for(let tasks of todoData){
+			if(tasks['taskName'] == newTask){
+				alert('Already in list');
+				inList = true;
+			}
+		}
+		if(!inList){
+			todoData.push({
+				"taskName" : newTask
+			});
+		}
 	}
 	console.log(todoData);
 	fillContentData("ToDo")			

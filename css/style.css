@@ -7,6 +7,11 @@ ul{
 
 		.appContainer{
 			border:5px solid black;
+			text-align: center;
+			width:100%;
+			margin:auto auto;
+			min-width: 100px;
+			min-height: 200px;
 		}
 
 		.containerTable{
