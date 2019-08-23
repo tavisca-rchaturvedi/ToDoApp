@@ -1,27 +1,20 @@
  
 let todoData = [{
-					"taskName" : "Assignment1"
+					"title" : "Assignment1"
 				},{
-					"taskName" : "Assignment2"
+					"title" : "Assignment2"
 				},{
-					"taskName" : "Assignment3"
+					"title" : "Assignment3"
 				}];
 
-const autoCompleteList= ["ActionScript", "AppleScript","Asp","BASIC", "C", "C++", "Clojure", "COBOL","ColdFusion","Erlang","Fortran","Groovy","Haskell","Java","JavaScript","Lisp","Perl","PHP","Python","Ruby","Scala","Scheme"];
+const autoCompleteList= [];
+//["ActionScript", "AppleScript","Asp","BASIC", "C", "C++", "Clojure", "COBOL","ColdFusion","Erlang","Fortran","Groovy","Haskell","Java","JavaScript","Lisp","Perl","PHP","Python","Ruby","Scala","Scheme"];
 
 
 function autocompleteApiData(){
-	var xmlhttp = new XMLHttpRequest();
-	var url = "https://gofile.io/?c=7PxmEp";
-	xmlhttp.open("GET", url, true);
-	xmlhttp.setRequestHeader("content-type", "application/x-www-form-urlencoded");
-	xmlhttp.send();
-	xmlhttp.onreadystatechange = function() {
-	    if (this.readyState == 4 && this.status == 200) {
-	        var myArr = JSON.parse(this.responseText);
-	        console.log(myArr);
-	    }
-	};
+	fetch("https://jsonplaceholder.typicode.com/todos/")
+	.then(response => response.json()) 
+	.then(responseList => { autoCompleteList.push(...responseList)});
 }
 
 autocompleteApiData();
@@ -32,9 +25,9 @@ function fillContentData(data){
 		document.getElementById("tabContent").appendChild(prepareTaskContentToBeShown());
 }
 
-function deleteItem(taskName){
+function deleteItem(title){
 	for(let taskIndex in todoData){
-		if(todoData[taskIndex]['taskName'] === taskName){
+		if(todoData[taskIndex]['title'] === title){
 			todoData.splice(taskIndex,1);
 			break;
 		}
@@ -109,8 +102,8 @@ function prepareTaskContentToBeShown(data = todoData){
 
 		rows = document.createElement("tr");
 		column = document.createElement("td");
-		inputElement = createInputElement("text", arr[tabIndex]['taskName'], "", "input"+tabIndex);
-		inputElement.setAttribute("value",arr[tabIndex]['taskName']);
+		inputElement = createInputElement("text", arr[tabIndex]['title'], "", "input"+tabIndex);
+		inputElement.setAttribute("value",arr[tabIndex]['title']);
 		inputElement.disabled = true;
 
 		column.appendChild(inputElement);
@@ -130,7 +123,7 @@ function prepareTaskContentToBeShown(data = todoData){
 
 		column = document.createElement("td");
 		inputElement = createInputElement("button","Delete", "tableButton", "");
-		inputElement.addEventListener("click", () => deleteItem(arr[tabIndex]['taskName']));
+		inputElement.addEventListener("click", () => deleteItem(arr[tabIndex]['title']));
 		column.appendChild(inputElement);
 		rows.appendChild(column);
 
@@ -151,16 +144,16 @@ function addItem(data){
 		let inList = false;
 		let newTask = data || elem.value;
 		if(newTask == "") return;
-		
+
 		for(let tasks of todoData){
-			if(tasks['taskName'] == newTask){
+			if(tasks['title'] == newTask){
 				alert('Already in list');
 				inList = true;
 			}
 		}
 		if(!inList){
 			todoData.push({
-				"taskName" : newTask
+				"title" : newTask
 			});
 		}
 	}
@@ -169,8 +162,8 @@ function addItem(data){
 
 function searchItem(){
 	let searchKey = document.getElementById('newItem').value;
-	let filteredTasks = autoCompleteList.filter(data => data.includes(searchKey));
-
+	let filteredTasks = autoCompleteList.filter(data => data["title"].includes(searchKey));
+	console.log(filteredTasks)
 	if(searchKey.length == 0 || filteredTasks.length == 0){
 		document.getElementById('searchDropdown').style.display = "none";
 	}
@@ -180,8 +173,8 @@ function searchItem(){
 
 		for(let task of filteredTasks){
 			let listElement = document.createElement("li");
-			inputElement = createInputElement("button", task, "tabs", "");
-			inputElement.addEventListener("click", () => addItem(task));
+			inputElement = createInputElement("button", task["title"], "tabs", "");
+			inputElement.addEventListener("click", () => addItem(task["title"]));
 
 			listElement.appendChild(inputElement);
 			listContent.appendChild(listElement);
@@ -199,7 +192,7 @@ function updateItem(itemId){
 }
 
 function saveItem(itemId){
-	todoData[itemId]["taskName"] = document.getElementById('input'+itemId).value;
+	todoData[itemId]["title"] = document.getElementById('input'+itemId).value;
 	document.getElementById('input'+itemId).disabled = true;
 	document.getElementById('update'+itemId).style.display ='block';
 	document.getElementById('save'+itemId).style.display = 'none';
