@@ -1,20 +1,21 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 	<head>
-		<script type="text/javascript" src="javascript/script.js"></script>
+		<title>ToDoApp</title>
+		<script src="javascript/script.js"></script>
 		<link rel="stylesheet" type="text/css" href="css/style.css">
 	</head>
 	<body>
 		<div class="appContainer">
 			<div id="tabList" class="tabList">
 				<div class="tabInput">
-					<input type="button" class="tabs" value ="ToDo" onclick=fillContentData("ToDo")>
+					<input type="button" class="tabs" value ="ToDo" onclick="fillContentData('ToDo')" />
 				</div>
 				<div class="tabInput">
-					<input type="button" class="tabs" value ="User" onclick=fillContentData("User")>
+					<input type="button" class="tabs" value ="User" onclick="fillContentData('User')" />
 				</div>
 				<div class="tabInput">
-					<input type="button" class="tabs" value ="Department" onclick=fillContentData("Department")>
+					<input type="button" class="tabs" value ="Department" onclick="fillContentData('Department')" />
 				</div>
 			</div>
 			<div id="tabContent" class="tabContent"></div>

@@ -13,16 +13,15 @@ const autoCompleteList= ["ActionScript", "AppleScript","Asp","BASIC", "C", "C++"
 function autocompleteApiData(){
 	var xmlhttp = new XMLHttpRequest();
 	var url = "https://gofile.io/?c=7PxmEp";
-
+	xmlhttp.open("GET", url, true);
+	xmlhttp.setRequestHeader("content-type", "application/x-www-form-urlencoded");
+	xmlhttp.send();
 	xmlhttp.onreadystatechange = function() {
 	    if (this.readyState == 4 && this.status == 200) {
 	        var myArr = JSON.parse(this.responseText);
 	        console.log(myArr);
 	    }
 	};
-	xmlhttp.open("GET", url, true);
-	xmlhttp.send();
-
 }
 
 autocompleteApiData();
@@ -34,12 +33,13 @@ function fillContentData(data){
 }
 
 function deleteItem(taskName){
-		for(let taskIndex in todoData){
-			if(todoData[taskIndex]['taskName'] === taskName){
-				todoData.splice(taskIndex,1);
-			}
+	for(let taskIndex in todoData){
+		if(todoData[taskIndex]['taskName'] === taskName){
+			todoData.splice(taskIndex,1);
+			break;
 		}
-		fillContentData("ToDo");
+	}
+	fillContentData("ToDo");
 }
 
 function createInputElement(type, value, classOfButton, id){
@@ -56,14 +56,11 @@ function createInputElement(type, value, classOfButton, id){
 
 function prepareTaskContentToBeShown(data = todoData){
 	let arr = data;
-	console.log(arr)
-
-	let element;
+	let element = [];
 
 	const tabContainer = document.createElement('div');
 	tabContainer.setAttribute("class", "container");
 
-	element = [];
 	element[0] = document.createElement('div');
 	element[0].setAttribute("class", "containerInput");
 
@@ -138,7 +135,6 @@ function prepareTaskContentToBeShown(data = todoData){
 		rows.appendChild(column);
 
 		tableElement.appendChild(rows);
-		console.log(tableElement)
 
 	}
 	element[2].appendChild(tableElement);
@@ -154,6 +150,8 @@ function addItem(data){
 	if(elem != null){
 		let inList = false;
 		let newTask = data || elem.value;
+		if(newTask == "") return;
+		
 		for(let tasks of todoData){
 			if(tasks['taskName'] == newTask){
 				alert('Already in list');
@@ -166,7 +164,6 @@ function addItem(data){
 			});
 		}
 	}
-	console.log(todoData);
 	fillContentData("ToDo")			
 }
 
@@ -179,19 +176,23 @@ function searchItem(){
 	}
 	else{
 		document.getElementById('searchDropdown').style.display = "block";
-		let content = "<ul>";
+		let listContent = document.createElement("ul");
 
 		for(let task of filteredTasks){
-			content += `<li><input class=tabs type=button value=${task} onclick=addItem("${task}")></li>`;
-		}
-		content+= "</ul>";
+			let listElement = document.createElement("li");
+			inputElement = createInputElement("button", task, "tabs", "");
+			inputElement.addEventListener("click", () => addItem(task));
 
-		document.getElementById('searchDropdown').innerHTML = content;
+			listElement.appendChild(inputElement);
+			listContent.appendChild(listElement);
+
+		}
+		document.getElementById('searchDropdown').innerText = "";
+		document.getElementById('searchDropdown').appendChild(listContent);
 	}
 }	
 
 function updateItem(itemId){
-	console.log(itemId);
 	document.getElementById('input'+itemId).disabled = false;
 	document.getElementById('update'+itemId).style.display = 'none';
 	document.getElementById('save'+itemId).style.display = 'block';
@@ -202,6 +203,5 @@ function saveItem(itemId){
 	document.getElementById('input'+itemId).disabled = true;
 	document.getElementById('update'+itemId).style.display ='block';
 	document.getElementById('save'+itemId).style.display = 'none';
-	console.log(todoData)
 }
  
