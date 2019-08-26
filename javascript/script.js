@@ -1,200 +1,205 @@
- 
-let todoData = [{
-					"title" : "Assignment1"
-				},{
-					"title" : "Assignment2"
-				},{
-					"title" : "Assignment3"
-				}];
+let todoApp = {
+	"data" : [{
+				"title" : "Assignment1"
+			},{
+				"title" : "Assignment2"
+			},{
+				"title" : "Assignment3"
+			}],
+	
+	"autoCompleteList" : [],
 
-const autoCompleteList= [];
-//["ActionScript", "AppleScript","Asp","BASIC", "C", "C++", "Clojure", "COBOL","ColdFusion","Erlang","Fortran","Groovy","Haskell","Java","JavaScript","Lisp","Perl","PHP","Python","Ruby","Scala","Scheme"];
+	"autoCompleteApiListPopulate" : function () {
+		fetch("https://jsonplaceholder.typicode.com/todos/")
+		.then(response => response.json()) 
+		.then(responseList => { this.autoCompleteList.push(...responseList)});
+	},
 
-
-function autocompleteApiData(){
-	fetch("https://jsonplaceholder.typicode.com/todos/")
-	.then(response => response.json()) 
-	.then(responseList => { autoCompleteList.push(...responseList)});
 }
 
-autocompleteApiData();
 
-function fillContentData(data){
-	document.getElementById("tabContent").innerHTML = "";
-	if(data == "ToDo")
-		document.getElementById("tabContent").appendChild(prepareTaskContentToBeShown());
-}
-
-function deleteItem(title){
-	for(let taskIndex in todoData){
-		if(todoData[taskIndex]['title'] === title){
-			todoData.splice(taskIndex,1);
-			break;
+const tabContent = {
+	"class" : "tabContent",
+	"fillContentData" : function (data){
+		document.getElementById(this.class).innerHTML = "";
+		if(data == "ToDo")
+			document.getElementById(this.class).appendChild(tabContent.prepareTaskContentToBeShown());
+	},
+	"deleteItem" : function (title){
+		for(let taskIndex in todoApp.data){
+			if(todoApp["data"][taskIndex]['title'] === title){
+				todoApp.data.splice(taskIndex,1);
+				break;
+			}
 		}
-	}
-	fillContentData("ToDo");
-}
+		this.fillContentData("ToDo");
+	},
+	"prepareTaskContentToBeShown" : function(data = todoApp.data){
+		let arr = data;
+		let element = [];
 
-function createInputElement(type, value, classOfButton, id){
-		
-	let inputElement = document.createElement("input");
+		const tabContainer = document.createElement('div');
+		tabContainer.setAttribute("class", "container");
 
-	inputElement.setAttribute("type", type);
-	inputElement.setAttribute("id", id);
-	inputElement.setAttribute("value",value);
-	inputElement.setAttribute("class",classOfButton);
+		element[0] = document.createElement('div');
+		element[0].setAttribute("class", "containerInput");
 
-	return inputElement;
-}
+		let inputElement = dom.createInputElement("text", "", "input", "newItem")
+		inputElement.setAttribute("placeholder", "Enter a new Task");
+		inputElement.addEventListener("keyup",() => tabContent.searchItem());
 
-function prepareTaskContentToBeShown(data = todoData){
-	let arr = data;
-	let element = [];
+		element[0].appendChild(inputElement);
 
-	const tabContainer = document.createElement('div');
-	tabContainer.setAttribute("class", "container");
+		let divElement = document.createElement("div");
+		divElement.setAttribute("id","searchDropdown");
 
-	element[0] = document.createElement('div');
-	element[0].setAttribute("class", "containerInput");
+		element[0].appendChild(divElement);
 
-	let inputElement = createInputElement("text", "", "input", "newItem")
-	inputElement.setAttribute("placeholder", "Enter a new Task");
-	inputElement.addEventListener("keyup",() => searchItem());
+		element[1] = document.createElement("div");
+		element[1].setAttribute("class", "containerButton");
 
-	element[0].appendChild(inputElement);
+		inputElement = dom.createInputElement("button","Add Item", "button", "");
+		inputElement.addEventListener("click", () => tabContent.addItem());
 
-	let divElement = document.createElement("div");
-	divElement.setAttribute("id","searchDropdown");
+		element[1].appendChild(inputElement);
 
-	element[0].appendChild(divElement);
+		element[2] = document.createElement("div");
+		element[2].setAttribute("class", "containerTable");
 
-	element[1] = document.createElement("div");
-	element[1].setAttribute("class", "containerButton");
+		let tableElement = document.createElement("table");
+		tableElement.setAttribute("border","1");
 
-	inputElement = createInputElement("button","Add Item", "button", "");
-	inputElement.addEventListener("click", () => addItem());
-
-	element[1].appendChild(inputElement);
-
-	element[2] = document.createElement("div");
-	element[2].setAttribute("class", "containerTable");
-
-	let tableElement = document.createElement("table");
-	tableElement.setAttribute("border","1");
-
-	let rows = document.createElement("tr");
-	let column = document.createElement("th");
-	column.innerText = "Task";
-	rows.appendChild(column);
-
-	column = document.createElement("th");
-	column.innerText = "Update";
-	rows.appendChild(column);
-
-	column = document.createElement("th");
-	column.innerText = "Delete";
-	rows.appendChild(column);
-
-	tableElement.appendChild(rows);
-
-
-	for(let tabIndex in arr){
-
-		rows = document.createElement("tr");
-		column = document.createElement("td");
-		inputElement = createInputElement("text", arr[tabIndex]['title'], "", "input"+tabIndex);
-		inputElement.setAttribute("value",arr[tabIndex]['title']);
-		inputElement.disabled = true;
-
-		column.appendChild(inputElement);
+		let rows = document.createElement("tr");
+		let column = document.createElement("th");
+		column.innerText = "Task";
 		rows.appendChild(column);
 
-		column = document.createElement("td");
-		inputElement = createInputElement("button","Update", "tableButton", "update"+tabIndex);
-		inputElement.addEventListener("click", () => updateItem(tabIndex));
-		column.appendChild(inputElement);
-
-		inputElement = createInputElement("button","Save", "tableButton", "save"+tabIndex);
-		inputElement.setAttribute("style","display: none");
-		inputElement.addEventListener("click", () => saveItem(tabIndex));
-
-		column.appendChild(inputElement);
+		column = document.createElement("th");
+		column.innerText = "Update";
 		rows.appendChild(column);
 
-		column = document.createElement("td");
-		inputElement = createInputElement("button","Delete", "tableButton", "");
-		inputElement.addEventListener("click", () => deleteItem(arr[tabIndex]['title']));
-		column.appendChild(inputElement);
+		column = document.createElement("th");
+		column.innerText = "Delete";
 		rows.appendChild(column);
 
 		tableElement.appendChild(rows);
 
-	}
-	element[2].appendChild(tableElement);
-	tabContainer.appendChild(element[0]);
-	tabContainer.appendChild(element[1]);
-	tabContainer.appendChild(element[2]);
-	return tabContainer;
-}
 
-function addItem(data){
-	let elem = document.getElementById("newItem");
-	console.log(elem);
-	if(elem != null){
-		let inList = false;
-		let newTask = data || elem.value;
-		if(newTask == "") return;
+		for(let tabIndex in arr){
 
-		for(let tasks of todoData){
-			if(tasks['title'] == newTask){
-				alert('Already in list');
-				inList = true;
+			rows = document.createElement("tr");
+			column = document.createElement("td");
+			inputElement = dom.createInputElement("text", arr[tabIndex]['title'], "", "input"+tabIndex);
+			inputElement.setAttribute("value",arr[tabIndex]['title']);
+			inputElement.disabled = true;
+
+			column.appendChild(inputElement);
+			rows.appendChild(column);
+
+			column = document.createElement("td");
+			inputElement = dom.createInputElement("button","Update", "tableButton", "update"+tabIndex);
+			inputElement.addEventListener("click", () => tabContent.updateItem(tabIndex));
+			column.appendChild(inputElement);
+
+			inputElement = dom.createInputElement("button","Save", "tableButton", "save"+tabIndex);
+			inputElement.setAttribute("style","display: none");
+			inputElement.addEventListener("click", () => tabContent.saveItem(tabIndex));
+
+			column.appendChild(inputElement);
+			rows.appendChild(column);
+
+			column = document.createElement("td");
+			inputElement = dom.createInputElement("button","Delete", "tableButton", "");
+			inputElement.addEventListener("click", () => tabContent.deleteItem(arr[tabIndex]['title']));
+			column.appendChild(inputElement);
+			rows.appendChild(column);
+
+			tableElement.appendChild(rows);
+
+		}
+		element[2].appendChild(tableElement);
+		tabContainer.appendChild(element[0]);
+		tabContainer.appendChild(element[1]);
+		tabContainer.appendChild(element[2]);
+		return tabContainer;
+	},
+	"addItem" : function (data) {
+		let elem = document.getElementById("newItem");
+		console.log(elem);
+		if(elem != null){
+			let inList = false;
+			let newTask = data || elem.value;
+			if(newTask == "") return;
+
+			for(let tasks of todoApp.data){
+				if(tasks['title'] == newTask){
+					alert('Already in list');
+					inList = true;
+				}
+			}
+			if(!inList){
+				todoApp.data.push({
+					"title" : newTask
+				});
 			}
 		}
-		if(!inList){
-			todoData.push({
-				"title" : newTask
-			});
+		tabContent.fillContentData("ToDo")	
+	},
+
+	"searchItem" : function() {
+		let searchKey = document.getElementById('newItem').value;
+		let filteredTasks = todoApp.autoCompleteList.filter(data => data["title"].includes(searchKey));
+		console.log(filteredTasks)
+		if(searchKey.length == 0 || filteredTasks.length == 0){
+			document.getElementById('searchDropdown').style.display = "none";
 		}
-	}
-	fillContentData("ToDo")			
-}
+		else{
+			document.getElementById('searchDropdown').style.display = "block";
+			let listContent = document.createElement("ul");
 
-function searchItem(){
-	let searchKey = document.getElementById('newItem').value;
-	let filteredTasks = autoCompleteList.filter(data => data["title"].includes(searchKey));
-	console.log(filteredTasks)
-	if(searchKey.length == 0 || filteredTasks.length == 0){
-		document.getElementById('searchDropdown').style.display = "none";
-	}
-	else{
-		document.getElementById('searchDropdown').style.display = "block";
-		let listContent = document.createElement("ul");
+			for(let task of filteredTasks){
+				let listElement = document.createElement("li");
+				inputElement = dom.createInputElement("button", task["title"], "tabs", "");
+				inputElement.addEventListener("click", () => addItem(task["title"]));
 
-		for(let task of filteredTasks){
-			let listElement = document.createElement("li");
-			inputElement = createInputElement("button", task["title"], "tabs", "");
-			inputElement.addEventListener("click", () => addItem(task["title"]));
+				listElement.appendChild(inputElement);
+				listContent.appendChild(listElement);
 
-			listElement.appendChild(inputElement);
-			listContent.appendChild(listElement);
-
+			}
+			document.getElementById('searchDropdown').innerText = "";
+			document.getElementById('searchDropdown').appendChild(listContent);
 		}
-		document.getElementById('searchDropdown').innerText = "";
-		document.getElementById('searchDropdown').appendChild(listContent);
+	},
+
+	"updateItem": function(itemId){
+		document.getElementById('input'+itemId).disabled = false;
+		document.getElementById('update'+itemId).style.display = 'none';
+		document.getElementById('save'+itemId).style.display = 'block';
+	},
+	"saveItem" : function(itemId){
+		todoApp["data"][itemId]["title"] = document.getElementById('input'+itemId).value;
+		document.getElementById('input'+itemId).disabled = true;
+		document.getElementById('update'+itemId).style.display ='block';
+		document.getElementById('save'+itemId).style.display = 'none';
 	}
-}	
 
-function updateItem(itemId){
-	document.getElementById('input'+itemId).disabled = false;
-	document.getElementById('update'+itemId).style.display = 'none';
-	document.getElementById('save'+itemId).style.display = 'block';
 }
 
-function saveItem(itemId){
-	todoData[itemId]["title"] = document.getElementById('input'+itemId).value;
-	document.getElementById('input'+itemId).disabled = true;
-	document.getElementById('update'+itemId).style.display ='block';
-	document.getElementById('save'+itemId).style.display = 'none';
+
+const dom = {
+	"createInputElement" : function (type, value, classOfButton, id) {
+		let inputElement = document.createElement("input");
+
+		inputElement.setAttribute("type", type);
+		inputElement.setAttribute("id", id);
+		inputElement.setAttribute("value",value);
+		inputElement.setAttribute("class",classOfButton);
+
+		return inputElement;
+	}
 }
+
+todoApp.autoCompleteApiListPopulate();
+
+
  
