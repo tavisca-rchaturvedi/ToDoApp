@@ -1,20 +1,15 @@
 let todoApp = {
-	"data" : [{
-				"title" : "Assignment1"
-			},{
-				"title" : "Assignment2"
-			},{
-				"title" : "Assignment3"
-			}],
-	
+	"data" : []
+}
+
+let autoCompleteData = {
 	"autoCompleteList" : [],
 
 	"autoCompleteApiListPopulate" : function () {
 		fetch("https://jsonplaceholder.typicode.com/todos/")
 		.then(response => response.json()) 
 		.then(responseList => { this.autoCompleteList.push(...responseList)});
-	},
-
+	}
 }
 
 
@@ -25,10 +20,11 @@ const tabContent = {
 		if(data == "ToDo")
 			document.getElementById(this.class).appendChild(tabContent.prepareTaskContentToBeShown());
 	},
-	"deleteItem" : function (title){
+	"deleteItem" : function (name){
 		for(let taskIndex in todoApp.data){
-			if(todoApp["data"][taskIndex]['title'] === title){
+			if(todoApp["data"][taskIndex]['name'] === name){
 				todoApp.data.splice(taskIndex,1);
+				apiRequests.deleteData(name);
 				break;
 			}
 		}
@@ -89,8 +85,8 @@ const tabContent = {
 
 			rows = document.createElement("tr");
 			column = document.createElement("td");
-			inputElement = dom.createInputElement("text", arr[tabIndex]['title'], "", "input"+tabIndex);
-			inputElement.setAttribute("value",arr[tabIndex]['title']);
+			inputElement = dom.createInputElement("text", arr[tabIndex]['name'], "", "input"+tabIndex);
+			inputElement.setAttribute("value",arr[tabIndex]['name']);
 			inputElement.disabled = true;
 
 			column.appendChild(inputElement);
@@ -110,7 +106,7 @@ const tabContent = {
 
 			column = document.createElement("td");
 			inputElement = dom.createInputElement("button","Delete", "tableButton", "");
-			inputElement.addEventListener("click", () => tabContent.deleteItem(arr[tabIndex]['title']));
+			inputElement.addEventListener("click", () => tabContent.deleteItem(arr[tabIndex]['name']));
 			column.appendChild(inputElement);
 			rows.appendChild(column);
 
@@ -132,15 +128,17 @@ const tabContent = {
 			if(newTask == "") return;
 
 			for(let tasks of todoApp.data){
-				if(tasks['title'] == newTask){
+				if(tasks['name'] == newTask){
 					alert('Already in list');
 					inList = true;
 				}
 			}
 			if(!inList){
 				todoApp.data.push({
-					"title" : newTask
+					"name" : newTask
 				});
+				apiRequests.addData(newTask.toString());
+				tabContent.prepareTaskContentToBeShown();
 			}
 		}
 		tabContent.fillContentData("ToDo")	
@@ -148,7 +146,7 @@ const tabContent = {
 
 	"searchItem" : function() {
 		let searchKey = document.getElementById('newItem').value;
-		let filteredTasks = todoApp.autoCompleteList.filter(data => data["title"].includes(searchKey));
+		let filteredTasks = autoCompleteData.autoCompleteList.filter(data => data["name"].includes(searchKey));
 		console.log(filteredTasks)
 		if(searchKey.length == 0 || filteredTasks.length == 0){
 			document.getElementById('searchDropdown').style.display = "none";
@@ -159,8 +157,8 @@ const tabContent = {
 
 			for(let task of filteredTasks){
 				let listElement = document.createElement("li");
-				inputElement = dom.createInputElement("button", task["title"], "tabs", "");
-				inputElement.addEventListener("click", () => addItem(task["title"]));
+				inputElement = dom.createInputElement("button", task["name"], "tabs", "");
+				inputElement.addEventListener("click", () => addItem(task["name"]));
 
 				listElement.appendChild(inputElement);
 				listContent.appendChild(listElement);
@@ -171,18 +169,84 @@ const tabContent = {
 		}
 	},
 
+	updateHelper : {},
+
 	"updateItem": function(itemId){
 		document.getElementById('input'+itemId).disabled = false;
 		document.getElementById('update'+itemId).style.display = 'none';
 		document.getElementById('save'+itemId).style.display = 'block';
+		this.updateHelper['previousName'] = todoApp["data"][itemId]["name"];
 	},
 	"saveItem" : function(itemId){
-		todoApp["data"][itemId]["title"] = document.getElementById('input'+itemId).value;
+		todoApp["data"][itemId]["name"] = document.getElementById('input'+itemId).value;
 		document.getElementById('input'+itemId).disabled = true;
 		document.getElementById('update'+itemId).style.display ='block';
 		document.getElementById('save'+itemId).style.display = 'none';
+		this.updateHelper['updatedName'] = todoApp["data"][itemId]["name"];
+
+		apiRequests.updateData(this.updateHelper);
+		this.updateHelper = {};
 	}
 
+}
+
+
+let apiRequests = {
+	"getData" : function() {	
+		let xhr = new XMLHttpRequest();
+		xhr.open("GET", "http://localhost:8080/api/v1/tasks/");
+		xhr.send(null);
+		xhr.onreadystatechange = function() {
+			todoApp.data = JSON.parse(xhr.responseText);
+			tabContent.prepareTaskContentToBeShown();
+			console.log(todoApp)
+		}
+	},
+	"addData" : function(data) {
+		let xhr = new XMLHttpRequest();
+		xhr.open("PUT", "http://localhost:8080/api/v1/tasks/add/");
+		xhr.setRequestHeader("Content-Type", "text/json");
+		let payload = {
+			"name" : data
+		};
+		xhr.send(JSON.stringify(payload));
+
+		xhr.onreadystatechange = function() {
+			tabContent.fillContentData("ToDo");
+		}
+		
+	},
+	"deleteData" : function(data) {
+		let xhr = new XMLHttpRequest();
+		xhr.open("DELETE", "http://localhost:8080/api/v1/tasks/delete");
+		xhr.setRequestHeader("Content-Type", "text/json");
+		let payload = {
+			"name" : data
+		};
+		xhr.send(JSON.stringify(payload));
+
+		xhr.onreadystatechange = function() {
+			todoApp.data = JSON.parse(xhr.responseText);
+			tabContent.prepareTaskContentToBeShown();
+			console.log(todoApp)
+		}
+	},
+	"updateData" : function(data){
+		let xhr = new XMLHttpRequest();
+		xhr.open("PATCH", "http://localhost:8080/api/v1/tasks/update");
+		xhr.setRequestHeader("Content-Type", "text/json");
+		let payload = {
+			"previousName" : data.previousName,
+			"updatedName" : data.updatedName
+		};
+		xhr.send(JSON.stringify(payload));
+
+		xhr.onreadystatechange = function() {
+			todoApp.data = JSON.parse(xhr.responseText);
+			tabContent.prepareTaskContentToBeShown();
+			console.log(todoApp)
+		}
+	}
 }
 
 
@@ -199,7 +263,8 @@ const dom = {
 	}
 }
 
-todoApp.autoCompleteApiListPopulate();
+autoCompleteData.autoCompleteApiListPopulate();
+apiRequests.getData()
 
 
  
